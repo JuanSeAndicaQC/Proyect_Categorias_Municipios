@@ -90,9 +90,9 @@ streamlit run app.py
 
 ## Autores
 
-Juan Sebastián Andica Largo
-Luis W. Morales M.
-Santiago León
+- Juan Sebastián Andica Largo
+- Luis W. Morales M.
+- Santiago León
 
 ## Contexto
 
