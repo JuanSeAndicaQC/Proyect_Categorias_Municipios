@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import utils as ut
 
+# ── Configuración de la página ──────────────────────────────
 st.set_page_config(
     page_title="Gráficos",
     page_icon="📊",
@@ -18,26 +19,31 @@ st.header("Análisis Visual")
 
 with st.container(border=True):
 
-#Gráfico 1: Evolución temporal
+    # ── Gráfico 1: Evolución temporal ──────────────────────────────
     with st.expander("📅 Evolución de entregas por año", expanded=False):
-
         evol = df.groupby("Año")["Total dispositivos"].sum().reset_index()
 
-        fig, ax = plt.subplots(figsize=(10, 3))
-        ax.plot(evol["Año"], evol["Total dispositivos"],
-                marker="o", color="#1f77b4", linewidth=2)
-        ax.fill_between(evol["Año"], evol["Total dispositivos"], alpha=0.15, color="#1f77b4")
-        ax.set_xlabel("Año")
-        ax.set_ylabel("Total dispositivos")
-        ax.set_xticks(evol["Año"])
-        ax.grid(axis="y", linestyle="--", alpha=0.5)
-        fig.tight_layout()
-        st.pyplot(fig)
-        plt.close()
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=evol["Año"],
+            y=evol["Total dispositivos"],
+            mode="lines+markers",
+            fill="tozeroy",
+            line_color="#1f77b4",
+            hovertemplate="Año: %{x}<br>Dispositivos: %{y:,.0f}<extra></extra>"
+        ))
+        fig.update_layout(
+            height=350,
+            template="plotly_dark",
+            xaxis_title="Año",
+            yaxis_title="Total dispositivos",
+            margin=dict(l=10, r=10, t=30, b=10)
+        )
+        fig.update_xaxes(dtick=1)
+        st.plotly_chart(fig, use_container_width=True)
 
-    # Gráfico 2: Por departamento
+    # ── Gráfico 2: Por departamento ──────────────────────────────
     with st.expander("🗺️ Dispositivos por departamento", expanded=False):
-
         por_depto = (
             df.groupby("Departamento")["Total dispositivos"]
             .sum()
@@ -45,19 +51,28 @@ with st.container(border=True):
             .reset_index()
         )
 
-        fig, ax = plt.subplots(figsize=(10, 8))
-        bars = ax.barh(por_depto["Departamento"], por_depto["Total dispositivos"],
-                    color="#2ca02c")
-        ax.set_xlabel("Total dispositivos")
-        ax.bar_label(bars, fmt="{:,.0f}", padding=3, fontsize=8)
-        ax.grid(axis="x", linestyle="--", alpha=0.4)
-        fig.tight_layout()
-        st.pyplot(fig)
-        plt.close()
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            y=por_depto["Departamento"],
+            x=por_depto["Total dispositivos"],
+            orientation="h",
+            marker_color="#2ca02c",
+            text=por_depto["Total dispositivos"],
+            texttemplate="%{text:,.0f}",
+            textposition="outside",
+            hovertemplate="<b>%{y}</b><br>Dispositivos: %{x:,.0f}<extra></extra>"
+        ))
+        fig.update_layout(
+            height=800,
+            template="plotly_dark",
+            xaxis_title="Total dispositivos",
+            yaxis_title="",
+            margin=dict(l=10, r=40, t=30, b=10)
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
-    #Gráfico 3: Cat 5 vs Cat 6 por año
+    # ── Gráfico 3: Cat 5 vs Cat 6 por año ──────────────────────────────
     with st.expander("⚖️ Categoría 5 vs Categoría 6 — dispositivos por año", expanded=False):
-
         cat_año = (
             df.groupby(["Año", "Categoria"])["Total dispositivos"]
             .sum()
@@ -65,20 +80,26 @@ with st.container(border=True):
             .reset_index()
         )
 
-        x = cat_año["Año"]
-        ancho = 0.35
-        fig, ax = plt.subplots(figsize=(10, 4))
-
+        fig = go.Figure()
         if 5 in cat_año.columns:
-            ax.bar(x - ancho/2, cat_año[5], ancho, label="Cat. 5", color="#ff7f0e")
+            fig.add_trace(go.Bar(
+                x=cat_año["Año"], y=cat_año[5],
+                name="Cat. 5", marker_color="#ff7f0e",
+                hovertemplate="Año: %{x}<br>Cat. 5: %{y:,.0f}<extra></extra>"
+            ))
         if 6 in cat_año.columns:
-            ax.bar(x + ancho/2, cat_año[6], ancho, label="Cat. 6", color="#1f77b4")
-
-        ax.set_xlabel("Año")
-        ax.set_ylabel("Total dispositivos")
-        ax.set_xticks(x)
-        ax.legend()
-        ax.grid(axis="y", linestyle="--", alpha=0.4)
-        fig.tight_layout()
-        st.pyplot(fig)
-        plt.close()
+            fig.add_trace(go.Bar(
+                x=cat_año["Año"], y=cat_año[6],
+                name="Cat. 6", marker_color="#1f77b4",
+                hovertemplate="Año: %{x}<br>Cat. 6: %{y:,.0f}<extra></extra>"
+            ))
+        fig.update_layout(
+            height=400,
+            template="plotly_dark",
+            barmode="group",
+            xaxis_title="Año",
+            yaxis_title="Total dispositivos",
+            margin=dict(l=10, r=10, t=30, b=10)
+        )
+        fig.update_xaxes(dtick=1)
+        st.plotly_chart(fig, use_container_width=True)

@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import utils as ut
 
+# ── Configuración de la página ──────────────────────────────
 st.set_page_config(
     page_title="Análisis Dinámico",
     page_icon="📊",
@@ -17,7 +18,7 @@ df = ut.cargar_datos()
 st.header("📊 Análisis Dinámico")
 st.caption("Explora los datos eligiendo qué variable analizar y cómo agruparla.")
 
-# Diccionarios: nombre visible → columna real
+# ── Diccionarios: nombre visible → columna real ──────────────────────────────
 variables = {
     "Total dispositivos": "Total dispositivos",
     "PCs MinTIC": "PCs aportados por MinTic",
@@ -33,40 +34,59 @@ agrupaciones = {
     "Categoría": "Categoria",
 }
 
-# Dos selectores lado a lado
+# ── Selectores ──────────────────────────────
 col1, col2 = st.columns(2)
 with col1:
-    var_label = st.selectbox("Variable a analizar", list(variables.keys()))
+    var_label = st.selectbox("Variable a analizar", list(variables.keys()), key="var_din")
 with col2:
-    grup_label = st.selectbox("Agrupar por", list(agrupaciones.keys()))
+    grup_label = st.selectbox("Agrupar por", list(agrupaciones.keys()), key="grup_din")
 
-# Traducir la selección a nombres de columna reales
-columna_var  = variables[var_label]
+columna_var = variables[var_label]
 columna_grup = agrupaciones[grup_label]
 
-# Agrupar según la selección y graficar
+# ── Agrupar y graficar ──────────────────────────────
 with st.container(border=True):
     st.subheader(f"{var_label} por {grup_label}")
 
     datos = df.groupby(columna_grup)[columna_var].sum().reset_index()
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig = go.Figure()
 
     if grup_label == "Año":
         # Línea para evolución temporal
-        ax.plot(datos[columna_grup], datos[columna_var],
-                marker="o", color="#1f77b4", linewidth=2)
-        ax.fill_between(datos[columna_grup], datos[columna_var], alpha=0.15, color="#1f77b4")
-        ax.set_xticks(datos[columna_grup])
-        ax.grid(axis="y", linestyle="--", alpha=0.5)
+        fig.add_trace(go.Scatter(
+            x=datos[columna_grup],
+            y=datos[columna_var],
+            mode="lines+markers",
+            fill="tozeroy",
+            line_color="#1f77b4",
+            hovertemplate=f"{grup_label}: %{{x}}<br>{var_label}: %{{y:,.0f}}<extra></extra>"
+        ))
+        fig.update_xaxes(dtick=1)
     else:
         # Barras horizontales para departamento y categoría
         datos = datos.sort_values(columna_var, ascending=True)
-        bars = ax.barh(datos[columna_grup].astype(str), datos[columna_var], color="#2ca02c")
-        ax.bar_label(bars, fmt="{:,.0f}", padding=3, fontsize=8)
-        ax.grid(axis="x", linestyle="--", alpha=0.4)
+        fig.add_trace(go.Bar(
+            y=datos[columna_grup].astype(str),
+            x=datos[columna_var],
+            orientation="h",
+            marker_color="#2ca02c",
+            text=datos[columna_var],
+            texttemplate="%{text:,.0f}",
+            textposition="outside",
+            hovertemplate=f"<b>%{{y}}</b><br>{var_label}: %{{x:,.0f}}<extra></extra>"
+        ))
 
-    ax.set_xlabel(var_label)
-    fig.tight_layout()
-    st.pyplot(fig)
-    plt.close()
+    # Alto dinámico para barras de departamento (32 categorías)
+    alto = 800 if grup_label == "Departamento" else 450
+
+    fig.update_layout(
+        height=alto,
+        template="plotly_dark",
+        xaxis_title=var_label,
+        yaxis_title="",
+        margin=dict(l=10, r=40, t=30, b=10),
+        showlegend=False
+    )
+
+    st.plotly_chart(fig, use_container_width=True)

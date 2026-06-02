@@ -44,6 +44,16 @@ def generarMenu():
             #icon="❤️​"
         )
         st.page_link(
+            page="pages/comparativa.py",
+            label="Comparativa",
+            #icon="📊"
+        )
+        st.page_link(
+            page="pages/linea_tiempo.py",
+            label="Linea de tiempo Municipios",
+            #icon="📊"
+        )
+        st.page_link(
             page="pages/pronostico.py",
             label="Pronóstico",
             #icon="❤️‍🩹​"
@@ -62,6 +72,7 @@ def generarMenu():
             page="pages/analisis_dinamico.py",
             label="Análisis Dinámico",
             #icon="📊"
+                
 )
 
 # Función para cargar los datos
