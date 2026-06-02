@@ -1,0 +1,28 @@
+[client]
+showSidebarNavigation = false
+[server]
+runOnSave = true
+[theme]
+# Opciones base compartidas
+base = "light"
+font = "sans-serif"
+baseFontSize = 16
+baseRadius = "0.5rem"
+# Tema Claro
+[theme.light]
+primaryColor = "#4CAF50"
+backgroundColor = "#F7F9FB"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2937"
+blueColor = "#2563EB"
+greenColor = "#16A34A"
+redColor = "#DC2626"
+# Tema oscuro
+[theme.dark]
+primaryColor = "#22C55E"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#1A1F2B"
+textColor = "#E5E7EB"
+blueColor = "#3B82F6"
+greenColor = "#22C55E"
+redColor = "#EF4444"

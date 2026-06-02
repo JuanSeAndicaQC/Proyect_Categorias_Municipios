@@ -1,0 +1,8 @@
+# Entorno virtual
+env/
+
+#  Llaves secretas o datos sensibles
+.env
+
+# Archivos temporales de python
+__pycache__/
